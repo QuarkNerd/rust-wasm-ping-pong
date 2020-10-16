@@ -24,6 +24,9 @@ pub struct Universe {
     height: u16,
     width: u16,
     paddle_height: u16,
+    paddle_width: u16,
+    paddle_x_offset: u16,
+    ball_size:u16,
     ball_pos: Vec<f64>,
     ball_vel: Vec<f64>,
     paddles_y_pos: Vec<f64>,
@@ -31,11 +34,14 @@ pub struct Universe {
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new(height: u16,width: u16, paddle_height:u16) -> Universe {
+    pub fn new(height: u16, width: u16, paddle_height:u16, paddle_width: u16, paddle_x_offset: u16, ball_size:u16) -> Universe {
         Universe {
             height,
             width,
             paddle_height,
+            paddle_width,
+            paddle_x_offset,
+            ball_size,
             ball_pos: vec!((height/2) as f64, (width/2) as f64),
             ball_vel: vec!(0.0,5.0),
             paddles_y_pos: vec!((height/2) as f64, (height/2) as f64),
@@ -50,8 +56,8 @@ impl Universe {
             self.ball_vel[0] = self.ball_vel[0]*(-1 as f64);
         }
 
-        if (self.ball_pos[1] < 10.0 && (self.ball_pos[0] - self.paddles_y_pos[0]).abs() < (self.paddle_height/2) as f64) ||
-           (self.ball_pos[1] > (self.width - 10) as f64 && (self.ball_pos[0] - self.paddles_y_pos[1]).abs() < (self.paddle_height/2) as f64)
+        if (self.ball_pos[1] < (self.paddle_width + self.paddle_x_offset) as f64 && (self.ball_pos[0] - self.paddles_y_pos[0]).abs() < (self.paddle_height/2) as f64) ||
+           (self.ball_pos[1] > (self.width - self.paddle_width - self.paddle_x_offset) as f64 && (self.ball_pos[0] - self.paddles_y_pos[1]).abs() < (self.paddle_height/2) as f64)
         { 
             self.ball_vel[1] = self.ball_vel[1]*-1.0;
         }
