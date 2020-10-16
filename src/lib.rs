@@ -41,7 +41,7 @@ impl Universe {
             paddle_x_pos: paddle_width + paddle_x_offset,
             ball_size,
             ball_pos: vec!((height/2) as f64, (width/2) as f64),
-            ball_vel: vec!(0.0,5.0),
+            ball_vel: vec!(1.5,5.0),
             paddles_y_pos: vec!((height/2) as f64, (height/2) as f64),
         }
     }
@@ -65,6 +65,7 @@ impl Universe {
         { 
             self.ball_vel[1] = self.ball_vel[1]*-1.0;
         }
+
     }
 
     pub fn ball_pos(&self) -> *const f64 {
@@ -73,6 +74,16 @@ impl Universe {
 
     pub fn paddles_y_pos(&self) -> *const f64 {
         self.paddles_y_pos.as_ptr()
+    }
+
+    pub fn key_pressed(&mut self, a:&str) {
+        match a {
+            "w" => self.paddles_y_pos[0] -= 10.0,
+            "s" => self.paddles_y_pos[0] += 10.0,
+            "ArrowUp" => self.paddles_y_pos[1] -= 10.0,
+            "ArrowDown" => self.paddles_y_pos[1] += 10.0,
+            _ => (),
+        }
     }
 }
 
