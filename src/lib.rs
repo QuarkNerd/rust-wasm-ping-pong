@@ -30,12 +30,15 @@ pub struct Universe {
     ball_vel: Vec<f64>,
     paddles_y_pos: Vec<f64>,
     paddle_vel: f64,
+    ball_max_y_vel: f64,
 } 
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new(height: u16, width: u16, paddle_height:u16, paddle_width: u16, paddle_x_offset: u16, ball_size:u16, paddle_vel: f64) -> Universe {
+    pub fn new(height: u16, width: u16, paddle_height:u16, paddle_width: u16, paddle_x_offset: u16, ball_size:u16, paddle_vel: f64, ball_x_vel: f64, ball_max_y_vel: f64) -> Universe {
         
+        log!("{}", js_sys::Math::random());
+        log!("{}",( if js_sys::Math::random() < 0.5 { 1.0 } else { -1.0 })*ball_x_vel);
         Universe {
             height,
             width,
@@ -43,9 +46,10 @@ impl Universe {
             paddle_x_pos: paddle_width + paddle_x_offset,
             ball_size,
             ball_pos: vec!((height/2) as f64, (width/2) as f64),
-            ball_vel: vec!(if js_sys::Math::random() < 0.5 { 1.0 } else { -1.0 },5.0),
+            ball_vel: vec!(ball_max_y_vel*js_sys::Math::random(), (if js_sys::Math::random() < 0.5 { 1.0 } else { -1.0 })*ball_x_vel),
             paddles_y_pos: vec!((height/2) as f64, (height/2) as f64),
-            paddle_vel
+            paddle_vel,
+            ball_max_y_vel
         }
     }
 
@@ -53,21 +57,40 @@ impl Universe {
         self.ball_pos[0] += self.ball_vel[0];
         self.ball_pos[1] += self.ball_vel[1];
 
-        let ball_x = self.ball_pos[0];
-        let ball_y = self.ball_pos[1];
+        let ball_x = self.ball_pos[1];
+        let ball_y = self.ball_pos[0];
 
-        let ball_paddle_0_y_diff = self.ball_pos[0] - self.paddles_y_pos[0];
-        let ball_paddle_1_y_diff = self.ball_pos[0] - self.paddles_y_pos[1];
+        let ball_paddle_0_y_diff = ball_y - self.paddles_y_pos[0];
+        let ball_paddle_1_y_diff = ball_y - self.paddles_y_pos[1];
 
-        if ball_x < 0.0 || ball_x > (self.height as f64) {
+        if ball_y < 0.0 || ball_y > (self.height as f64) {
             self.ball_vel[0] = self.ball_vel[0]*-1.0;
         }
 
-        if (ball_y < self.paddle_x_pos as f64 && ball_paddle_0_y_diff.abs() < (self.paddle_height/2) as f64) ||
-           (ball_y > (self.width - self.paddle_x_pos) as f64 && ball_paddle_1_y_diff.abs() < (self.paddle_height/2) as f64)
-        { 
-            self.ball_vel[1] = self.ball_vel[1]*-1.0;
+        let mut y_diff_ratio: Option<f64> = None; 
+        if ball_x < self.paddle_x_pos as f64 {
+            y_diff_ratio = Some(ball_paddle_0_y_diff / (self.paddle_height/2) as f64)
+        } 
+        else if ball_x > (self.width - self.paddle_x_pos) as f64
+        {
+             y_diff_ratio = Some(ball_paddle_1_y_diff / (self.paddle_height/2) as f64)
+        };
+        
+        if let Some(r) = y_diff_ratio {
+            if r.abs() < 1.0 {
+                self.ball_vel[1] = self.ball_vel[1]*-1.0;
+                self.ball_vel[0] = (self.ball_max_y_vel*r.abs().sqrt()).copysign(r);
+            }
+            else {
+                //loss
+            }
         }
+
+        // as f64 && ball_paddle_0_y_diff.abs() < (self.paddle_height/2) as f64) ||
+        //    (ball_x > (self.width - self.paddle_x_pos) as f64 && ball_paddle_1_y_diff.abs() < (self.paddle_height/2) as f64)
+        // { 
+        //     self.ball_vel[1] = self.ball_vel[1]*-1.0;
+        // }
 
     }
 
