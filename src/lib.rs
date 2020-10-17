@@ -30,6 +30,7 @@ pub struct Universe {
     ball_vel: Vec<f64>,
     paddles_y_pos: Vec<f64>,
     paddle_vel: f64,
+    ball_x_vel: f64,
     ball_max_y_vel: f64,
 } 
 
@@ -37,8 +38,6 @@ pub struct Universe {
 impl Universe {
     pub fn new(height: u16, width: u16, paddle_height:u16, paddle_width: u16, paddle_x_offset: u16, ball_size:u16, paddle_vel: f64, ball_x_vel: f64, ball_max_y_vel: f64) -> Universe {
         
-        log!("{}", js_sys::Math::random());
-        log!("{}",( if js_sys::Math::random() < 0.5 { 1.0 } else { -1.0 })*ball_x_vel);
         Universe {
             height,
             width,
@@ -49,6 +48,7 @@ impl Universe {
             ball_vel: vec!(ball_max_y_vel*js_sys::Math::random(), (if js_sys::Math::random() < 0.5 { 1.0 } else { -1.0 })*ball_x_vel),
             paddles_y_pos: vec!((height/2) as f64, (height/2) as f64),
             paddle_vel,
+            ball_x_vel,
             ball_max_y_vel
         }
     }
@@ -82,15 +82,12 @@ impl Universe {
                 self.ball_vel[0] = (self.ball_max_y_vel*r.abs().sqrt()).copysign(r);
             }
             else {
-                //loss
+                self.ball_vel = vec!(self.ball_max_y_vel*js_sys::Math::random(), (if js_sys::Math::random() < 0.5 { 1.0 } else { -1.0 })*self.ball_x_vel);
+                // can't create new vec because JS needs pointer
+                self.ball_pos[0] = (self.height/2) as f64; 
+                self.ball_pos[1] = (self.width/2) as f64;
             }
         }
-
-        // as f64 && ball_paddle_0_y_diff.abs() < (self.paddle_height/2) as f64) ||
-        //    (ball_x > (self.width - self.paddle_x_pos) as f64 && ball_paddle_1_y_diff.abs() < (self.paddle_height/2) as f64)
-        // { 
-        //     self.ball_vel[1] = self.ball_vel[1]*-1.0;
-        // }
 
     }
 
