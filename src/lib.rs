@@ -25,15 +25,17 @@ pub struct Universe {
     width: u16,
     paddle_height: u16,
     paddle_x_pos: u16,
-    ball_size:u16,
+    ball_size: u16,
     ball_pos: Vec<f64>,
     ball_vel: Vec<f64>,
     paddles_y_pos: Vec<f64>,
+    paddle_vel: f64,
 } 
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new(height: u16, width: u16, paddle_height:u16, paddle_width: u16, paddle_x_offset: u16, ball_size:u16) -> Universe {
+    pub fn new(height: u16, width: u16, paddle_height:u16, paddle_width: u16, paddle_x_offset: u16, ball_size:u16, paddle_vel: f64) -> Universe {
+        
         Universe {
             height,
             width,
@@ -41,8 +43,9 @@ impl Universe {
             paddle_x_pos: paddle_width + paddle_x_offset,
             ball_size,
             ball_pos: vec!((height/2) as f64, (width/2) as f64),
-            ball_vel: vec!(1.5,5.0),
+            ball_vel: vec!(if js_sys::Math::random() < 0.5 { 1.0 } else { -1.0 },5.0),
             paddles_y_pos: vec!((height/2) as f64, (height/2) as f64),
+            paddle_vel
         }
     }
 
@@ -78,10 +81,10 @@ impl Universe {
 
     pub fn key_pressed(&mut self, a:&str) {
         match a {
-            "w" => self.paddles_y_pos[0] -= 10.0,
-            "s" => self.paddles_y_pos[0] += 10.0,
-            "ArrowUp" => self.paddles_y_pos[1] -= 10.0,
-            "ArrowDown" => self.paddles_y_pos[1] += 10.0,
+            "w" => self.paddles_y_pos[0] -= self.paddle_vel,
+            "s" => self.paddles_y_pos[0] += self.paddle_vel,
+            "ArrowUp" => self.paddles_y_pos[1] -= self.paddle_vel,
+            "ArrowDown" => self.paddles_y_pos[1] += self.paddle_vel,
             _ => (),
         }
     }
