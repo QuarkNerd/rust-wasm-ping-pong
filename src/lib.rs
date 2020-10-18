@@ -8,17 +8,6 @@ use wasm_bindgen::prelude::*;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-// #[wasm_bindgen]
-// extern {
-//     fn alert(s: &str);
-// }
-
-// #[wasm_bindgen]
-// pub fn greet() {
-//     alert("Hng!");
-// }
-
-
 #[wasm_bindgen]
 pub struct Universe {
     height: u16,
@@ -32,6 +21,7 @@ pub struct Universe {
     paddle_vel: f64,
     ball_x_vel: f64,
     ball_max_y_vel: f64,
+    score: Vec<u8>,
 } 
 
 #[wasm_bindgen]
@@ -49,7 +39,8 @@ impl Universe {
             paddles_y_pos: vec!((height/2) as f64, (height/2) as f64),
             paddle_vel,
             ball_x_vel,
-            ball_max_y_vel
+            ball_max_y_vel,
+            score: vec!(0, 0),
         }
     }
 
@@ -68,8 +59,10 @@ impl Universe {
         }
 
         let mut y_diff_ratio: Option<f64> = None; 
+        let mut is_ball_behind_paddle_0 = false;
         if ball_x < self.paddle_x_pos as f64 {
-            y_diff_ratio = Some(ball_paddle_0_y_diff / (self.paddle_height/2) as f64)
+            y_diff_ratio = Some(ball_paddle_0_y_diff / (self.paddle_height/2) as f64);
+            is_ball_behind_paddle_0 = true;
         } 
         else if ball_x > (self.width - self.paddle_x_pos) as f64
         {
@@ -86,6 +79,11 @@ impl Universe {
                 // can't create new vec because JS needs pointer
                 self.ball_pos[0] = (self.height/2) as f64; 
                 self.ball_pos[1] = (self.width/2) as f64;
+                if is_ball_behind_paddle_0 {
+                    self.score[1] += 1;
+                } else {
+                    self.score[0] += 1;
+                }
             }
         }
 
@@ -97,6 +95,10 @@ impl Universe {
 
     pub fn paddles_y_pos(&self) -> *const f64 {
         self.paddles_y_pos.as_ptr()
+    }
+
+    pub fn score(&self) -> *const u8 {
+        self.score.as_ptr()
     }
 
     pub fn key_pressed(&mut self, a:&str) {
