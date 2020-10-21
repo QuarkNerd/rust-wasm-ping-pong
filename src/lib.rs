@@ -65,19 +65,19 @@ impl Universe {
         let ball_paddle_0_y_diff = ball_y - self.paddles_y_pos[0];
         let ball_paddle_1_y_diff = ball_y - self.paddles_y_pos[1];
 
-        if ball_y < 0.0 || ball_y > (self.height as f64) {
+        if ball_y < (self.ball_size/2) as f64 || ball_y > (self.height - self.ball_size/2) as f64  {
             self.ball_vel[0] = self.ball_vel[0]*-1.0;
         }
 
-        let mut y_diff_ratio: Option<f64> = None; 
+        let mut y_diff_ratio: Option<f64> = None;
         let mut is_ball_behind_paddle_0 = false;
-        if ball_x < self.paddle_x_pos as f64 {
-            y_diff_ratio = Some(ball_paddle_0_y_diff / (self.paddle_height/2) as f64);
+        if ball_x < (self.paddle_x_pos + self.ball_size/2) as f64 {
+            y_diff_ratio = Some(ball_paddle_0_y_diff / ((self.paddle_height + self.ball_size)/2) as f64);
             is_ball_behind_paddle_0 = true;
         } 
-        else if ball_x > (self.width - self.paddle_x_pos) as f64
+        else if ball_x > (self.width - self.paddle_x_pos - self.ball_size/2) as f64
         {
-             y_diff_ratio = Some(ball_paddle_1_y_diff / (self.paddle_height/2) as f64)
+             y_diff_ratio = Some(ball_paddle_1_y_diff / ((self.paddle_height + self.ball_size)/2) as f64)
         };
         
         if let Some(r) = y_diff_ratio {
