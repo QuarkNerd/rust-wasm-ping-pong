@@ -9,6 +9,13 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
+#[repr(u8)]
+pub enum GameState {
+    InProgress   = 0,
+    GameOver     = 1,
+}
+
+#[wasm_bindgen]
 pub struct Universe {
     height: u16,
     width: u16,
@@ -22,11 +29,13 @@ pub struct Universe {
     ball_x_vel: f64,
     ball_max_y_vel: f64,
     score: Vec<u8>,
+    max_score: u8,
+    game_state: Vec<GameState>,
 } 
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new(height: u16, width: u16, paddle_height:u16, paddle_width: u16, paddle_x_offset: u16, ball_size:u16, paddle_vel: f64, ball_x_vel: f64, ball_max_y_vel: f64) -> Universe {
+    pub fn new(height: u16, width: u16, paddle_height:u16, paddle_width: u16, paddle_x_offset: u16, ball_size:u16, paddle_vel: f64, ball_x_vel: f64, ball_max_y_vel: f64, max_score: u8) -> Universe {
         
         Universe {
             height,
@@ -41,6 +50,8 @@ impl Universe {
             ball_x_vel,
             ball_max_y_vel,
             score: vec!(0, 0),
+            max_score,
+            game_state: vec!(GameState::InProgress),
         }
     }
 
@@ -79,11 +90,16 @@ impl Universe {
                 // can't create new vec because JS needs pointer
                 self.ball_pos[0] = (self.height/2) as f64; 
                 self.ball_pos[1] = (self.width/2) as f64;
+                
                 if is_ball_behind_paddle_0 {
                     self.score[1] += 1;
                 } else {
                     self.score[0] += 1;
                 }
+                if self.score[1] == self.max_score || self.score[0] == self.max_score{
+                        self.ball_vel = vec!(0.0, 0.0);
+                        self.game_state[0] = GameState::GameOver;
+                    }
             }
         }
 
@@ -99,6 +115,10 @@ impl Universe {
 
     pub fn score(&self) -> *const u8 {
         self.score.as_ptr()
+    }
+
+    pub fn game_state(&self) -> *const GameState {
+        self.game_state.as_ptr()
     }
 
     pub fn key_pressed(&mut self, a:&str) {
