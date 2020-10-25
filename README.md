@@ -4,16 +4,18 @@ Ping pong made in Rust/Webassembly and Javascript
 
 ## 🚴 Usage
 
-Install Rust - https://www.rust-lang.org/tools/install
-Install Wasm-pack - https://rustwasm.github.io/wasm-pack/installer/ (for webassembly)
-npm https://www.npmjs.com/get-npm
+1. Install Rust - https://www.rust-lang.org/tools/install
+2. Install Wasm-pack - https://rustwasm.github.io/wasm-pack/installer/ (for webassembly)
+3. npm https://www.npmjs.com/get-npm
 
-Run
-wasm-pack build
-cd www
-npm install
-npm start
+4. Run
+    + wasm-pack build
+    + cd www
+    + npm install
+    + npm start
 
 Visit http://localhost:8080/
 
 ## 🚴 Or just go to
+
+https://quarknerd.github.io/rust-wasm-ping-pong/
